@@ -47,8 +47,8 @@ export const useQuestion = () => {
     const _chat = [...chat]
     _chat.push({ role: "user", content: fieldValue })
     setChat(_chat)
-    await sendChat()
     setFieldValue("");
+    await sendChat()
   }
 
   return { fieldValue, handleFieldChange, handleAskQuestion, chat };
