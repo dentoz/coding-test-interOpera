@@ -72,7 +72,7 @@ async def ai_endpoint(request: Request):
     print(f"Received question: {user_question}")
     
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:  # Increased timeout to 30 seconds
+        async with httpx.AsyncClient(timeout=30.0) as client:  
             response = await client.post(API_URL, headers=HEADERS, json={"inputs": user_question})
 
         if response.status_code != 200:
