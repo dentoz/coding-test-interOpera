@@ -59,7 +59,7 @@ def get_data():
             content={"message": "Error processing data", "error": str(e)}
         )
 
-@app.post("/api/ai")
+@app.post("/api/ai", tags=["AI"], summary="Huggingface API which return a summary of text", description="Returns the summary of the text, in json format.")
 async def ai_endpoint(request: Request):
     """
     Accepts a user question and returns a placeholder AI response.
