@@ -29,19 +29,26 @@ export const useQuestion = () => {
       body: JSON.stringify({ question: fieldValue }),
     });
     if (!response.ok) {
-      throw new Error("Network response was not ok");
+      setChat((prev) => {
+        const _chat = [...prev]
+        _chat.push({ role: "assistant", content: 'Network response was not ok' })
+        return _chat
+      });
     }
     const data = await response.json();
-    const _chat = [...chat]
-    _chat.push({ role: "assistant", content: data.data })
-    setChat(_chat);
+    setChat((prev) => {
+      const _chat = [...prev]
+      _chat.push({ role: "assistant", content: data.data })
+      return _chat
+    });
   }
 
-  const handleAskQuestion = () => {
+  const handleAskQuestion = async () => {
     const _chat = [...chat]
     _chat.push({ role: "user", content: fieldValue })
-    sendChat()
     setChat(_chat)
+    await sendChat()
+    setFieldValue("");
   }
 
   return { fieldValue, handleFieldChange, handleAskQuestion, chat };

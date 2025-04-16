@@ -1,6 +1,6 @@
 import { useReps } from "./reps.hooks";
 import { RepsTable } from "../components/repsTable";
-import { Button, Container, Stack, TextField } from "@mui/material";
+import { Button, Container, Stack, TextField, Typography } from "@mui/material";
 import styles from "../styles/reps.module.scss";
 import chatStyle from "../styles/chat.module.scss";
 import { useQuestion } from "./question.hooks";
@@ -8,34 +8,8 @@ import { isEmpty } from "lodash";
 
 export default function Home({ reps }) {
   const { loading } = useReps();
-  const { fieldValue, handleFieldChange, handleAskQuestion, chat } = useQuestion()
-
-  // useEffect(() => {
-  //   fetch("http://localhost:8000/api/data")
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setUsers(data.users || []);
-  //       setLoading(false);
-  //     })
-  //     .catch((err) => {
-  //       console.error("Failed to fetch data:", err);
-  //       setLoading(false);
-  //     });
-  // }, []);
-
-  // const handleAskQuestion = async () => {
-  //   try {
-  //     const response = await fetch("http://localhost:8000/api/ai", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ question }),
-  //     });
-  //     const data = await response.json();
-  //     setAnswer(data.answer);
-  //   } catch (error) {
-  //     console.error("Error in AI request:", error);
-  //   }
-  // };
+  const { fieldValue, handleFieldChange, handleAskQuestion, chat } =
+    useQuestion();
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -43,23 +17,28 @@ export default function Home({ reps }) {
 
       <section style={{ marginBottom: "2rem" }}>
         <h2>Dummy Data</h2>
-        <Container className={styles['reps-table-container']}>
+        <Container className={styles["reps-table-container"]}>
           <RepsTable loading={loading} reps={reps} />
         </Container>
       </section>
 
       <section>
         <h2>Ask a Question (AI Endpoint)</h2>
-        <Container>
-        {!isEmpty(chat) && (
-          <Stack>
-            {chat.map((item, index) => (
-              <div key={index} className={`${chatStyle['chat-item']} ${item.role == "user" ? "user" : "assistant"}`}>
-                <strong>{item.role}:</strong> {item.content}
-              </div>
-            ))}
-          </Stack>
-        )}
+        <Container sx={{ backgroundColor: '#F9FBF9', padding: '0 !important' }}>
+          {!isEmpty(chat) && (
+            <Stack sx={{ padding: "1rem" }} spacing={2}>
+              {chat.map((item, index) => (
+                <div
+                  key={index}
+                  className={`${chatStyle["chat-item"]} ${
+                    item.role == "user" ? "user" : "assistant"
+                  }`}
+                >
+                  <Typography variant="body1">{item.content}</Typography>
+                </div>
+              ))}
+            </Stack>
+          )}
           <TextField
             variant="filled"
             fullWidth
@@ -68,9 +47,16 @@ export default function Home({ reps }) {
             onChange={handleFieldChange}
             slotProps={{
               input: {
-                  endAdornment: <Button variant="contained" onClick={() => handleAskQuestion()}>Ask</Button>
+                endAdornment: (
+                  <Button
+                    variant="contained"
+                    onClick={() => handleAskQuestion()}
+                  >
+                    Ask
+                  </Button>
+                ),
               },
-          }}
+            }}
           />
         </Container>
       </section>

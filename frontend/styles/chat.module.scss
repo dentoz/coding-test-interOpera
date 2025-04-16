@@ -6,8 +6,11 @@
     margin-bottom: 0.5rem;
     &:global {
         &.user {
-            background-color: azure;
+            background-color: #D8F3DC;
             align-self: flex-end;
+        }
+        &.assistant {
+            background-color: #FFF;
         }
     }
 }
