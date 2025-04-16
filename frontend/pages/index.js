@@ -1,37 +1,41 @@
-import { useState, useEffect } from "react";
+import { useReps } from "./reps.hooks";
+import { RepsTable } from "../components/repsTable";
+import { Button, Container, Stack, TextField } from "@mui/material";
+import styles from "../styles/reps.module.scss";
+import chatStyle from "../styles/chat.module.scss";
+import { useQuestion } from "./question.hooks";
+import { isEmpty } from "lodash";
 
-export default function Home() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+export default function Home({ reps }) {
+  const { loading } = useReps();
+  const { fieldValue, handleFieldChange, handleAskQuestion, chat } = useQuestion()
 
-  useEffect(() => {
-    fetch("http://localhost:8000/api/data")
-      .then((res) => res.json())
-      .then((data) => {
-        setUsers(data.users || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch data:", err);
-        setLoading(false);
-      });
-  }, []);
+  // useEffect(() => {
+  //   fetch("http://localhost:8000/api/data")
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setUsers(data.users || []);
+  //       setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Failed to fetch data:", err);
+  //       setLoading(false);
+  //     });
+  // }, []);
 
-  const handleAskQuestion = async () => {
-    try {
-      const response = await fetch("http://localhost:8000/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
-      });
-      const data = await response.json();
-      setAnswer(data.answer);
-    } catch (error) {
-      console.error("Error in AI request:", error);
-    }
-  };
+  // const handleAskQuestion = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:8000/api/ai", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ question }),
+  //     });
+  //     const data = await response.json();
+  //     setAnswer(data.answer);
+  //   } catch (error) {
+  //     console.error("Error in AI request:", error);
+  //   }
+  // };
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -39,36 +43,59 @@ export default function Home() {
 
       <section style={{ marginBottom: "2rem" }}>
         <h2>Dummy Data</h2>
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <ul>
-            {users.map((user) => (
-              <li key={user.id}>
-                {user.name} - {user.role}
-              </li>
-            ))}
-          </ul>
-        )}
+        <Container className={styles['reps-table-container']}>
+          <RepsTable loading={loading} reps={reps} />
+        </Container>
       </section>
 
       <section>
         <h2>Ask a Question (AI Endpoint)</h2>
-        <div>
-          <input
-            type="text"
-            placeholder="Enter your question..."
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-          />
-          <button onClick={handleAskQuestion}>Ask</button>
-        </div>
-        {answer && (
-          <div style={{ marginTop: "1rem" }}>
-            <strong>AI Response:</strong> {answer}
-          </div>
+        <Container>
+        {!isEmpty(chat) && (
+          <Stack>
+            {chat.map((item, index) => (
+              <div key={index} className={`${chatStyle['chat-item']} ${item.role == "user" ? "user" : "assistant"}`}>
+                <strong>{item.role}:</strong> {item.content}
+              </div>
+            ))}
+          </Stack>
         )}
+          <TextField
+            variant="filled"
+            fullWidth
+            placeholder="Enter your question..."
+            value={fieldValue}
+            onChange={handleFieldChange}
+            slotProps={{
+              input: {
+                  endAdornment: <Button variant="contained" onClick={() => handleAskQuestion()}>Ask</Button>
+              },
+          }}
+          />
+        </Container>
       </section>
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  const res = await fetch("http://localhost:8000/api/data", {
+    cache: "force-cache",
+    next: { revalidate: 60 },
+  });
+
+  if (res.status !== 200) {
+    return {
+      props: {
+        reps: [],
+      },
+    };
+  }
+  const data = await res.json();
+
+  return {
+    props: {
+      reps: data.data,
+    },
+  };
 }
